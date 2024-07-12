@@ -42,7 +42,7 @@ class TuberiaMensaje extends MultiplexConn
     // Manejadores de eventos: _manejadoresEventos[$fuente][$nombreMsg] = array($obj, $metodo)
     private $_manejadoresEventos = array();
 
-    function __construct(private $_nombreFuente)
+    function __construct($_nombreFuente)
     {
         $this->_socks = stream_socket_pair(
             STREAM_PF_UNIX,
@@ -258,7 +258,7 @@ class TuberiaMensaje extends MultiplexConn
      */
     function __call($sMetodo, $args)
     {
-    	if (str_starts_with($sMetodo, 'msg_')) {
+    	if (substr($sMetodo, 0, 4) == 'msg_') {
             $l = explode('_', $sMetodo, 3);
             $this->enviarMensaje($l[1], $l[2], $args);
         } else {

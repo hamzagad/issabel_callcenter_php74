@@ -56,7 +56,7 @@ class ECCPProcess extends TuberiaProcess
         return $this->_multiplex->escuchaActiva();
     }
 
-    public function procedimientoDemonio(): bool
+    public function procedimientoDemonio()
     {
         // Rutear todos los mensajes pendientes entre tareas y agentes
         if ($this->_multiplex->procesarPaquetes())

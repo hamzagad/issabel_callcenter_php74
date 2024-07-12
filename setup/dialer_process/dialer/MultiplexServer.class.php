@@ -26,7 +26,7 @@ class MultiplexServer
     protected $_oLog;        // Objeto log para reportar problemas
     protected $_hEscucha = FALSE;    // Socket de escucha para nuevas conexiones
     private $_conexiones = array();    // Lista de conexiones atendidas con clientes
-    private int $_uniqueid = 0;
+    private $_uniqueid = 0;
 
     // Lista de objetos escucha, de tipos variados
     protected $_listaConn = array();
@@ -246,7 +246,7 @@ class MultiplexServer
      *
      * @return Clave a usar para identificar la conexión
      */
-    protected function agregarConexion(mixed $hConexion)
+    protected function agregarConexion($hConexion)
     {
         $nuevaConn = array(
             'socket'                =>  $hConexion,

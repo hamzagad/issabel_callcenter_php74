@@ -71,7 +71,7 @@ class AMIEventProcess extends TuberiaProcess
     private $_queueshadow = NULL;
     private $_bridgeManager = NULL;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null): bool
+    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -119,7 +119,7 @@ class AMIEventProcess extends TuberiaProcess
         return TRUE;
     }
 
-    public function procedimientoDemonio(): bool
+    public function procedimientoDemonio()
     {
         // Verificar si la conexión AMI sigue siendo válida
         if (!is_null($this->_config)) {
@@ -499,7 +499,7 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
-    private function _manejarLlamadaEspecialECCP($params): bool
+    private function _manejarLlamadaEspecialECCP($params)
     {
     	$sKey = $params['ActionID'];
 
@@ -546,7 +546,7 @@ class AMIEventProcess extends TuberiaProcess
         return FALSE;   // Llamada NO es una llamada especial ECCP
     }
 
-    private function _manejarHangupAgentLoginFallido($params): bool
+    private function _manejarHangupAgentLoginFallido($params)
     {
         $a = $this->_listaAgentes->buscar('uniqueidlogin', $params['Uniqueid']);
         if (is_null($a)) return FALSE;
@@ -558,7 +558,7 @@ class AMIEventProcess extends TuberiaProcess
         return TRUE;
     }
 
-    private function _nuevasCampanias($listaCampaniasAvisar): bool
+    private function _nuevasCampanias($listaCampaniasAvisar)
     {
         // TODO: purgar campañas salientes fuera de horario
         // Nuevas campañas salientes
@@ -1660,7 +1660,7 @@ Uniqueid: 1429642067.241008
         }
     }
 
-    public function msg_Default($sEvent, $params, $sServer, $iPort): string
+    public function msg_Default($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -1671,7 +1671,7 @@ Uniqueid: 1429642067.241008
         return 'AMI_EVENT_DISCARD';
     }
 
-    public function msg_Newchannel($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Newchannel($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -1710,7 +1710,7 @@ Uniqueid: 1429642067.241008
         return FALSE;
     }
 
-    public function msg_Dial($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Dial($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -1776,7 +1776,7 @@ Uniqueid: 1429642067.241008
                     $this->_log->output("DEBUG: ".__METHOD__.": encontrado canal auxiliar para llamada: {$llamada->actionid}");
                 }
 
-                if (!str_starts_with($params['Destination'], 'Local/')) {
+                if (strpos($params['Destination'], 'Local/') !== 0) {
                     if (is_null($llamada->actualchannel)) {
                         // Primer Dial observado, se asigna directamente
                         $this->_asignarCanalRemotoReal($params, $llamada);
@@ -1841,7 +1841,7 @@ Uniqueid: 1429642067.241008
         $llamada->llamadaIniciaDial($params['local_timestamp_received'], $params['Destination']);
     }
 
-    public function msg_OriginateResponse($sEvent, $params, $sServer, $iPort): bool
+    public function msg_OriginateResponse($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -1947,7 +1947,7 @@ Uniqueid: 1429642067.241008
         }
     }
 
-    public function msg_QueueMemberRemoved($sEvent, $params, $sServer, $iPort): bool
+    public function msg_QueueMemberRemoved($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -1999,7 +1999,7 @@ Uniqueid: 1429642067.241008
         return FALSE;
     }
 
-    public function msg_Join($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Join($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -2067,7 +2067,7 @@ Uniqueid: 1429642067.241008
         }
     }
 
-    public function msg_Link($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Link($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -2201,7 +2201,7 @@ Uniqueid: 1429642067.241008
                 if (!is_null($llamada)) $sCanalCandidato = $params['Channel1'];
             }
             if (!is_null($llamada) && !is_null($sCanalCandidato) &&
-                !str_starts_with($sCanalCandidato, 'Local/')) {
+                strpos($sCanalCandidato, 'Local/') !== 0) {
             	if (is_null($llamada->actualchannel)) {
                     $llamada->actualchannel = $sCanalCandidato;
                     if ($this->DEBUG) {
@@ -2271,7 +2271,7 @@ Uniqueid: 1429642067.241008
         return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
     }
 
-    public function msg_Hangup($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Hangup($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
@@ -2373,7 +2373,7 @@ Uniqueid: 1429642067.241008
         $a->completarLoginAgente($this->_ami);
     }
 
-    public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort): bool
+    public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.

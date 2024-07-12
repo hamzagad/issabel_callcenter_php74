@@ -27,7 +27,7 @@ class TuberiaProcess extends AbstractProcess
     // Tubería con la que se comunica con otros procesos
     protected $_multiplex = NULL;  // Multiplex con que se realiza comunicación
 
-    function __construct(protected $_tuberia)
+    function __construct($_tuberia)
     {
     }
 }

@@ -26,7 +26,7 @@ class ECCPServer extends MultiplexServer
     private $DEBUG = FALSE;
 
     // Constructor con objeto adicional de tubería
-    function __construct($sUrlSocket, &$oLog, private $_tuberia)
+    function __construct($sUrlSocket, &$oLog, $_tuberia)
     {
     	parent::__construct($sUrlSocket, $oLog);
     }
@@ -67,7 +67,7 @@ class ECCPServer extends MultiplexServer
      */
     function __call($sMetodo, $args)
     {
-        if (!str_starts_with($sMetodo, 'notificarEvento_')) {
+        if (strpos($sMetodo, 'notificarEvento_') !== 0) {
             $this->_oLog->output("ERR: no se reconoce método $sMetodo como una notificación");
             return;
         }

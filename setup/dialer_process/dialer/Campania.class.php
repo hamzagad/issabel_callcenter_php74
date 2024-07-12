@@ -25,7 +25,7 @@
  * tardó en ser contestada */
 define('NUM_LLAMADAS_HISTORIAL_CONTESTADA', 20);
 
-class Campania implements \Stringable
+class Campania
 {
     public $id;                // ID en base de datos de la campaña
     public $name;              // Nombre de la campaña
@@ -52,14 +52,14 @@ class Campania implements \Stringable
     public $id_queue_call_entry;   // ID de la cola registrada como entrante
 
     function __construct(
-        private $_tuberia,
+        $_tuberia,
         // Relaciones con otros objetos conocidos
-        private $_log
+        $_log
     )
     {
     }
 
-    public function __toString(): string
+    public function __toString()
     {
         return (string) "ID={$this->id} {$this->tipo_campania} name={$this->name}";
     }

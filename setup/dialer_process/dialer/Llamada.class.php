@@ -21,7 +21,7 @@
   +----------------------------------------------------------------------+
   $Id: Llamada.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
-class Llamada implements \Stringable
+class Llamada 
 {
     // Agente que está atendiendo la llamada, o NULL para llamada sin atender
     public $agente = NULL;
@@ -157,13 +157,13 @@ class Llamada implements \Stringable
     // Este constructor sólo debe invocarse desde ListaLlamadas::nuevaLlamada()
     function __construct(
         // Referencia a contenedor de llamadas e índice dentro del contenedor
-        private ListaLlamadas $_listaLlamadas,
+        ListaLlamadas $_listaLlamadas,
         // Propiedades específicas de la llamada
         // Tipo de llamada, 'incoming', 'outgoing'
-        private $_tipo_llamada,
-        private $_tuberia,
+        $_tipo_llamada,
+        $_tuberia,
         // Relaciones con otros objetos conocidos
-        private $_log
+        $_log
     )
     {
     }
@@ -172,7 +172,7 @@ class Llamada implements \Stringable
     private function _nultime($i) { return is_null($i) ? '----/--/-- --:--:--' : date('Y/m/d H:i:s', $i); }
     private function _agentecorto($a) { return is_null($a) ? '(ninguno)' : $a->__toString(); }
 
-    public function __toString(): string
+    public function __toString()
     {
         return "ID=".($this->id_llamada).
             " tipo=".($this->tipo_llamada).
@@ -368,7 +368,7 @@ class Llamada implements \Stringable
                 }
 
                 // Si el canal de la llamada no es Local, es el actualchannel
-                if (!str_starts_with($this->_channel, 'Local/')) {
+                if (strpos($this->_channel, 'Local/') !== 0) {
                 	$this->actualchannel = $v;
                 }
             }
@@ -382,8 +382,8 @@ class Llamada implements \Stringable
                 $this->_listaLlamadas->agregarIndice('actualchannel', $this->_actualchannel, $this);
 
                 // El valor de trunk es derivado de channel
-                if ((is_null($this->_trunk) || str_starts_with($this->_trunk, 'Local/'))
-                    && !str_starts_with($v, 'Local/')) {
+                if ((is_null($this->_trunk) || strpos($this->_trunk, 'Local/') === 0)
+                    && strpos($v, 'Local/') !== 0) {
                     $this->_trunk = NULL;
                     $regs = NULL;
                     if (preg_match('/^(.+)-[0-9a-fA-F]+$/', $this->_actualchannel, $regs)) {
@@ -525,7 +525,7 @@ class Llamada implements \Stringable
     }
 
     public function marcarLlamada($ami, $sFuente, $iTimeoutOriginate,
-        $timestamp, $sContext, $sCID, $sCadenaVar, $retry, $trunk, $precall_events): bool
+        $timestamp, $sContext, $sCID, $sCadenaVar, $retry, $trunk, $precall_events)
     {
         if ($this->tipo_llamada != 'outgoing')
             return FALSE;
@@ -647,7 +647,7 @@ class Llamada implements \Stringable
         /* No se acepta un canal NULL ni el mismo canal del agente (para
          * llamadas manuales). */
         if (is_null($this->channel) && !is_null($channel) &&
-            (is_null($this->agente_agendado) || !str_starts_with($channel, $this->agente_agendado->channel))) {
+            (is_null($this->agente_agendado) || strpos($channel, $this->agente_agendado->channel) !== 0)) {
             $this->channel = $channel;
         }
 
@@ -828,11 +828,11 @@ class Llamada implements \Stringable
         if (is_null($this->channel)) $this->channel = $sRemChannel;
 
         // El canal verdadero es más util que Local/XXX para las operaciones
-        if (str_starts_with($sRemChannel, 'Local/') && !is_null($this->channel)
+        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->channel)
             && $sRemChannel != $this->channel) {
             $sRemChannel = $this->channel;
         }
-        if (str_starts_with($sRemChannel, 'Local/') && !is_null($this->actualchannel)
+        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->actualchannel)
             && $sRemChannel != $this->actualchannel) {
             $sRemChannel = $this->actualchannel;
         }
@@ -1147,7 +1147,7 @@ class Llamada implements \Stringable
         }
     }
 
-    public function agregarCanalSilenciado($chan): bool
+    public function agregarCanalSilenciado($chan)
     {
         if (in_array($chan, $this->_mutedchannels)) return FALSE;
         if (count($this->_mutedchannels) == 0 && !is_null($this->agente)) {

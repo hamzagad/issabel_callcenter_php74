@@ -67,7 +67,7 @@ class CampaignProcess extends TuberiaProcess
      */
     private $_finalizandoPrograma = FALSE;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null): bool
+    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -179,7 +179,7 @@ class CampaignProcess extends TuberiaProcess
         $dbConn = NULL;
     }
 
-    public function procedimientoDemonio(): bool
+    public function procedimientoDemonio()
     {
         // Verificar posible desconexión de la base de datos
         if (is_null($this->_db)) {
@@ -928,7 +928,7 @@ SQL_LLAMADA_COLOCADA;
     /**
      * Procedimiento para obtener el número de segundos de reserva de una campaña
      */
-    private function _getSegundosReserva($idCampaign): int
+    private function _getSegundosReserva($idCampaign)
     {
         return 30;  // TODO: volver configurable en DB o por campaña
     }
@@ -1069,11 +1069,11 @@ PETICION_LLAMADAS_AGENTE;
         } elseif (stripos($sTrunk, '$OUTNUM$') !== FALSE) {
             // Este es un trunk personalizado que provee $OUTNUM$ ya preparado
             return array('TRUNK' => $sTrunk);
-        } elseif (str_starts_with($sTrunk, 'SIP/')
+        } elseif (strpos($sTrunk, 'SIP/') === 0
             || stripos($sTrunk, 'Zap/') === 0
             || stripos($sTrunk, 'DAHDI/') === 0
-            || str_starts_with($sTrunk, 'IAX/')
-            || str_starts_with($sTrunk, 'IAX2/')) {
+            || strpos($sTrunk,  'IAX/') === 0
+            || strpos($sTrunk, 'IAX2/') === 0) {
             // Este es un trunk Zap o SIP. Se debe concatenar el prefijo de marcado
             // (si existe), y a continuación el número a marcar.
             $infoTrunk = $this->_leerPropiedadesTrunk($sTrunk);
@@ -1177,13 +1177,13 @@ PETICION_LLAMADAS_AGENTE;
                 $recordset->execute(array($sTrunkConsulta));
                 $sVariable = $recordset->fetch(PDO::FETCH_COLUMN, 0);
                 $recordset->closeCursor();
-                if (!$sVariable && !str_starts_with($sTrunkConsulta, 'DAHDI')) {
+                if (!$sVariable && strpos($sTrunkConsulta, 'DAHDI') !== 0) {
                     $this->_log->output("ERR: al consultar información de trunk '$sTrunkConsulta' en FreePBX (1) - trunk no se encuentra!");
                     $dbConn = NULL;
                     return NULL;
                 }
 
-                if (!$sVariable && str_starts_with($sTrunkConsulta, 'DAHDI')) {
+                if (!$sVariable && strpos($sTrunkConsulta, 'DAHDI') === 0) {
                     /* Podría ocurrir que esta versión de FreePBX todavía guarda la
                      * información sobre troncales DAHDI bajo nombres ZAP. Para
                      * encontrarla, se requiere de transformación antes de la consulta.
@@ -1315,7 +1315,7 @@ PETICION_LLAMADAS_AGENTE;
         return $this->_construirListaParametros($lista);
     }
 
-    private function _construirListaParametros($listaVar): string
+    private function _construirListaParametros($listaVar)
     {
         $versionMinima = array(1, 6, 0);
         while (count($versionMinima) < count($this->_asteriskVersion))

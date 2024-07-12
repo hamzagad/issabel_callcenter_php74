@@ -31,7 +31,7 @@ class QueueShadow
     private $_queues = array();
     private $_queueflags = NULL;
 
-    function __construct(private $_log)
+    function __construct($_log)
     {
     }
 
@@ -215,7 +215,7 @@ class QueueShadow
         $this->_queues[$params['Queue']]['callers']++;
     }
 
-    function msg_Leave($params): bool
+    function msg_Leave($params)
     {
         if (!isset($this->_queues[$params['Queue']])) {
             $this->_log->output('WARN: '.__METHOD__.': no se encuentra cola '.$params['Queue']);

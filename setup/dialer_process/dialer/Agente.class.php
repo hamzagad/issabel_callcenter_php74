@@ -32,7 +32,7 @@ define('AST_DEVICE_RINGING',    6);
 define('AST_DEVICE_RINGINUSE',  7);
 define('AST_DEVICE_ONHOLD',     8);
 
-class Agente implements \Stringable
+class Agente
 {
     /* Referencia a la llamada atendida por el agente, o NULL si no atiende.
      * Para entrar y salir de hold se requiere [incoming/outgoing, canal cliente,
@@ -40,11 +40,11 @@ class Agente implements \Stringable
     private $_llamada = NULL;
 
     // ID en la base de datos del agente
-    private int $_id_agent;
-    private string $_name;
+    private $_id_agent = NULL;
+    private $_name = NULL;
     private $_number = NULL;
-    private bool $_estatus;
-    private string $_type;
+    private $_estatus = NULL;
+    private $_type = NULL;
 
     /*  Estado de la consola. Los valores posibles son
         logged-out  No hay agente logoneado
@@ -113,9 +113,9 @@ class Agente implements \Stringable
     // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
     private $_logging_inicio = NULL;
 
-    function __construct(private ListaAgentes $_listaAgentes, $idAgente, $iNumero, $sNombre,
-        $bEstatus, $sType, private $_tuberia, // Relaciones con otros objetos conocidos
-        private $_log)
+    function __construct(ListaAgentes $_listaAgentes, $idAgente, $iNumero, $sNombre,
+        $bEstatus, $sType, $_tuberia, // Relaciones con otros objetos conocidos
+        $_log)
     {
         $this->_id_agent = (int)$idAgente;
         $this->_name = (string)$sNombre;
@@ -171,7 +171,7 @@ class Agente implements \Stringable
         $log->output($s);
     }
 
-    public function __toString(): string
+    public function __toString()
     {
         return 'ID='.$this->id_agent.
             ' type='.$this->type.
@@ -179,7 +179,7 @@ class Agente implements \Stringable
             ' '.$this->name;
     }
 
-    private function _strestadocolas(): string
+    private function _strestadocolas()
     {
         // El estado de la cola sólo es usable si eventmemberstatus está activo
         // para la cola en cuestión.

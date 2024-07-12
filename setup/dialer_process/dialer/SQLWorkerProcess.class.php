@@ -53,7 +53,7 @@ class SQLWorkerProcess extends TuberiaProcess
 
     private $_finalizandoPrograma = FALSE;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null): bool
+    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -154,7 +154,7 @@ class SQLWorkerProcess extends TuberiaProcess
         }
     }
 
-    public function procedimientoDemonio(): bool
+    public function procedimientoDemonio()
     {
         // Lo siguiente NO debe de iniciar operaciones DB, sólo acumular acciones
         $bPaqProcesados = $this->_multiplex->procesarPaquetes();
@@ -822,7 +822,7 @@ class SQLWorkerProcess extends TuberiaProcess
         $sDirBaseMonitor = '/var/spool/asterisk/monitor/';
 
         // Quitar el prefijo de monitoring de todos los archivos
-        if (str_starts_with($recordingfile, $sDirBaseMonitor))
+        if (strpos($recordingfile, $sDirBaseMonitor) === 0)
             $recordingfile = substr($recordingfile, strlen($sDirBaseMonitor));
 
         // Se asume que el archivo está completo con extensión

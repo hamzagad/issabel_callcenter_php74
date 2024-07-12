@@ -363,11 +363,11 @@ class AMIClientConn extends MultiplexConn
         }
     }
 
-    function connect($server, $username, $secret): bool
+    function connect($server, $username, $secret)
     {
         // Determinar servidor y puerto a usar
         $iPuerto = AMI_PORT;
-        if(str_contains($server, ':')) {
+        if(strpos($server, ':') !== false) {
             $c = explode(':', $server);
             $server = $c[0];
             $iPuerto = $c[1];
@@ -472,7 +472,7 @@ class AMIClientConn extends MultiplexConn
             return $this->_emulate_sync_response($paquete);
         };
         $callback_params = array();
-        if (strlen($name) > 5 && str_starts_with($name, 'async')) {
+        if (strlen($name) > 5 && substr($name, 0, 5) == 'async') {
             $callback = array_shift($args);
             $callback_params = array_shift($args);
             if (is_null($callback_params)) $callback_params = array();
@@ -552,7 +552,7 @@ class AMIClientConn extends MultiplexConn
         $this->_response = $paquete;
     }
 
-    private function _send_next_request(): bool
+    private function _send_next_request()
     {
         if (count($this->_queue_requests) <= 0) return TRUE;    // no hay más peticiones
         if (is_null($this->_queue_requests[0][0])) return TRUE; // petición en progreso
@@ -611,7 +611,7 @@ class AMIClientConn extends MultiplexConn
     * @param string $callback function
     * @return boolean sucess
     */
-    function add_event_handler($event, $callback): bool
+    function add_event_handler($event, $callback)
     {
       $event = strtolower($event);
       if(isset($this->event_handlers[$event]))
@@ -728,7 +728,7 @@ class AMIClientConn extends MultiplexConn
      * @param mixed $value      The value to add
      * @return bool True if successful
      */
-    function database_put($family, $key, mixed $value): bool {
+    function database_put($family, $key, $value) {
         $r = $this->Command("database put ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key)." ".$value);
 
         $this->raw_response = NULL;
@@ -745,7 +745,7 @@ class AMIClientConn extends MultiplexConn
      * @param string $key       The key name to use
      * @return mixed Value of the key, or false if error
      */
-    function database_get($family, $key): bool|string {
+    function database_get($family, $key) {
         $r = $this->Command("database get ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
 
         $this->raw_response = NULL;
@@ -756,7 +756,7 @@ class AMIClientConn extends MultiplexConn
 
         $lineas = explode("\r\n", $r["data"]);
         while ($lineas !== []) {
-            if (str_starts_with($lineas[0], "Value:")) {
+            if (substr($lineas[0],0,6) == "Value:") {
                 return trim(substr(implode("\r\n", $lineas),6));
             }
             array_shift($lineas);
@@ -769,7 +769,7 @@ class AMIClientConn extends MultiplexConn
      * @param string $key       The key name to use
      * @return bool True if successful
      */
-    function database_del($family, $key): bool {
+    function database_del($family, $key) {
         $r = $this->Command("database del ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
 
         $this->raw_response = NULL;

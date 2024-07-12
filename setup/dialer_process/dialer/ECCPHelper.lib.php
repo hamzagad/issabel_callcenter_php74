@@ -33,11 +33,14 @@
  */
 function leerInfoLlamada($db, $sTipoLlamada, $idCampania, $idLlamada)
 {
-    return match ($sTipoLlamada) {
-        'incoming' => _leerInfoLlamadaIncoming($db, $idCampania, $idLlamada),
-        'outgoing' => _leerInfoLlamadaOutgoing($db, $idCampania, $idLlamada),
-        default => NULL,
-    };
+    switch ($sTipoLlamada) {
+        case 'incoming':
+            return _leerInfoLlamadaIncoming($db, $idCampania, $idLlamada);
+        case 'outgoing':
+            return _leerInfoLlamadaOutgoing($db, $idCampania, $idLlamada);
+        default:
+            return NULL;
+    }
 }
 
 // Leer la información de una llamada saliente. La información incluye lo

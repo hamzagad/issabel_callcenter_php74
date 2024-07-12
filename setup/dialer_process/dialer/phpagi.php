@@ -249,20 +249,21 @@
     function channel_status($channel='')
     {
       $ret = $this->evaluate("CHANNEL STATUS $channel");
-      $ret['data'] = match ($ret['result']) {
-          -1 => trim("There is no channel that matches $channel"),
-          AST_STATE_DOWN => 'Channel is down and available',
-          AST_STATE_RESERVED => 'Channel is down, but reserved',
-          AST_STATE_OFFHOOK => 'Channel is off hook',
-          AST_STATE_DIALING => 'Digits (or equivalent) have been dialed',
-          AST_STATE_RING => 'Line is ringing',
-          AST_STATE_RINGING => 'Remote end is ringing',
-          AST_STATE_UP => 'Line is up',
-          AST_STATE_BUSY => 'Line is busy',
-          AST_STATE_DIALING_OFFHOOK => 'Digits (or equivalent) have been dialed while offhook',
-          AST_STATE_PRERING => 'Channel has detected an incoming call and is waiting for ring',
-          default => "Unknown ({$ret['result']})",
-      };
+      switch($ret['result'])
+      {
+        case -1: $ret['data'] = trim("There is no channel that matches $channel"); break;
+        case AST_STATE_DOWN: $ret['data'] = 'Channel is down and available'; break;
+        case AST_STATE_RESERVED: $ret['data'] = 'Channel is down, but reserved'; break;
+        case AST_STATE_OFFHOOK: $ret['data'] = 'Channel is off hook'; break;
+        case AST_STATE_DIALING: $ret['data'] = 'Digits (or equivalent) have been dialed'; break;
+        case AST_STATE_RING: $ret['data'] = 'Line is ringing'; break;
+        case AST_STATE_RINGING: $ret['data'] = 'Remote end is ringing'; break;
+        case AST_STATE_UP: $ret['data'] = 'Line is up'; break;
+        case AST_STATE_BUSY: $ret['data'] = 'Line is busy'; break;
+        case AST_STATE_DIALING_OFFHOOK: $ret['data'] = 'Digits (or equivalent) have been dialed while offhook'; break;
+        case AST_STATE_PRERING: $ret['data'] = 'Channel has detected an incoming call and is waiting for ring'; break;
+        default: $ret['data'] = "Unknown ({$ret['result']})"; break;
+      }
       return $ret;
     }
 
@@ -329,7 +330,7 @@
      * @param string $application
      * @return array, see evaluate for return information. ['result'] is whatever the application returns, or -2 on failure to find application
      */
-    function exec($application, mixed $options)
+    function exec($application, $options)
     {
       if(is_array($options)) $options = implode('|', $options);
       return $this->evaluate("EXEC $application $options");
@@ -1428,7 +1429,7 @@
             $text .= $symbol['k'.$code];
         }
         $this->say_punctuation($text);
-      } while(str_ends_with($result['result'], '**'));
+      } while(substr($result['result'], -2) == '**');
       return $text;
     }
 
@@ -1578,7 +1579,7 @@
           {
 	    $tmp = trim($token);
 	    $tmp = $tmp[0] == '(' ? substr($tmp,1):$tmp;
-	    $tmp = str_ends_with($tmp, ')') ? substr($tmp,0,strlen($tmp)-1):$tmp;
+	    $tmp = substr($tmp,-1) == ')' ? substr($tmp,0,strlen($tmp)-1):$tmp;
 	    $ret['data'] .= ' ' . trim($tmp);
             if($token[strlen($token)-1] == ')') $in_token = false;
           }

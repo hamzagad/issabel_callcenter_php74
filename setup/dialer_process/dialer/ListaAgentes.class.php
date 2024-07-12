@@ -31,11 +31,11 @@ class ListaAgentes implements IteratorAggregate
         'extension'     =>  array(),    // agent->extension extensión (SIP/1064) que inició la llamada de login
     );
 
-    function __construct(private $_tuberia, private $_log)
+    function __construct($_tuberia, $_log)
     {
     }
 
-    function numLlamadas(): int { return count($this->_agentes); }
+    function numLlamadas() { return count($this->_agentes); }
 
     function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType)
     {

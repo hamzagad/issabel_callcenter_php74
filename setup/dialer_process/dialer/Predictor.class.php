@@ -41,11 +41,11 @@ class Predictor
     private $_enum_complete = TRUE;
     public $timestamp_examen = 0;
 
-    function __construct(private $_astConn)
+    function __construct($_astConn)
     {
     }
 
-    function examinarColas($colas): bool
+    function examinarColas($colas)
     {
         // Manejadores de eventos de interés
         $this->_tmp_actionid = posix_getpid().'-'.time();

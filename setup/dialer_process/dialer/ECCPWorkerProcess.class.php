@@ -47,7 +47,7 @@ class ECCPWorkerProcess extends TuberiaProcess
     private $_eccpconn;
     private $_numPeticionesAtendidas = 0;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null): bool
+    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
