@@ -68,7 +68,7 @@ class paloSantoDontCall
         return $recordset;
     }
 
-    function borrarDontCall($arrData): bool
+    function borrarDontCall($arrData)
     {
         $this->_db->beginTransaction();
         foreach ($arrData as $id_dnc) {
@@ -89,7 +89,7 @@ class paloSantoDontCall
         return TRUE;
     }
 
-    private function _insertarNumero($dnc, &$loadReport): bool
+    private function _insertarNumero($dnc, &$loadReport)
     {
         if (count($this->_stmt) <= 0) {
             $this->_stmt['SELECT'] = $this->_db->conn->prepare(

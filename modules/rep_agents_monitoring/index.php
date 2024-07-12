@@ -59,16 +59,21 @@ function _moduleContent(&$smarty, $module_name)
         $sAction = '';
 
     $oPaloConsola = new PaloSantoConsola();
-    $sContenido = match ($sAction) {
-        'checkStatus' => manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola),
-        default => manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola),
-    };
+    switch ($sAction) {
+        case 'checkStatus':
+            $sContenido = manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+            break;
+        case '':
+        default:
+            $sContenido = manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+            break;
+    }    
     $oPaloConsola->desconectarTodo();
 
     return $sContenido;
 }
 
-function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola): string
+function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     global $arrLang;
 
@@ -277,7 +282,7 @@ function generarEstadoHash($module_name, $estadoCliente)
     return $estadoHash;
 }
 
-function timestamp_format($i): string
+function timestamp_format($i)
 {
 	return sprintf('%02d:%02d:%02d',
         ($i - ($i % 3600)) / 3600,

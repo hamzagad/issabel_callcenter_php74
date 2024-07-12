@@ -68,11 +68,18 @@ function _moduleContent(&$smarty, $module_name)
         "CANCEL"        =>  _tr("Cancel"),
     ));
 
-    $contenidoModulo = match ($sAccion) {
-        'new' => nuevoBreak($smarty, $module_name, $pDB, $local_templates_dir),
-        'edit' => editarBreak($smarty, $module_name, $pDB, $local_templates_dir),
-        default => listBreaks($smarty, $module_name, $pDB, $local_templates_dir),
-    };
+    switch ($sAccion) {
+        case 'new':
+            $contenidoModulo = nuevoBreak($smarty, $module_name, $pDB, $local_templates_dir);
+            break;
+        case 'edit':
+            $contenidoModulo = editarBreak($smarty, $module_name, $pDB, $local_templates_dir);
+            break;    
+        case 'list':
+        default:
+            $contenidoModulo = listBreaks($smarty, $module_name, $pDB, $local_templates_dir);
+            break;
+    }
     return $contenidoModulo;
 }
 

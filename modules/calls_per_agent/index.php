@@ -189,7 +189,7 @@ function _moduleContent(&$smarty, $module_name)
     return $oGrid->fetchGrid();    
 }
 
-function formatoSegundos($iSeg): string
+function formatoSegundos($iSeg)
 {
     $iSeg = (int)$iSeg;
     $iHora = $iMinutos = $iSegundos = 0;

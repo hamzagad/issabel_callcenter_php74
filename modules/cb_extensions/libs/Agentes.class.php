@@ -111,7 +111,7 @@ class Agentes
      * 
      * @return  bool    VERDADERO si se inserta correctamente agente, FALSO si no.
      */
-    function addAgent($agent): bool
+    function addAgent($agent)
     {
 	
         if (!is_array($agent) || count($agent) < 3) {
@@ -232,7 +232,7 @@ class Agentes
         }
     }
 
-    function deleteAgent($id_agent): bool
+    function deleteAgent($id_agent)
     {
         if (!preg_match('/^[0-9]+$/', $id_agent)) {
             $this->errMsg = '(internal) Invalid agent information';
@@ -279,9 +279,9 @@ class Agentes
 
             $bMembers = FALSE;
             foreach ($lineas as $sLinea) {
-                if (str_contains($sLinea, 'No Members') || str_contains($sLinea, 'Members:'))
+                if (strpos($sLinea, 'No Members') !== FALSE || strpos($sLinea, 'Members:') !== FALSE)
                     $bMembers = TRUE;
-                elseif (str_contains($sLinea, 'No Callers') || str_contains($sLinea, 'Callers:'))
+                elseif (strpos($sLinea, 'No Callers') !== FALSE || strpos($sLinea, 'Callers:') !== FALSE)
                     $bMembers = FALSE;
                 elseif ($bMembers) {
                 	$regs = NULL;
@@ -296,7 +296,7 @@ class Agentes
         }
     }
 
-    function desconectarAgentes($arrAgentes): bool
+    function desconectarAgentes($arrAgentes)
     {
         $this->errMsg = NULL;
 
@@ -321,9 +321,9 @@ class Agentes
             $regs = NULL;
             if (preg_match('/^(\w+) has \d+ calls/', $sLinea, $regs)) {
             	$sCurQueue = $regs[1];
-            } elseif (str_contains($sLinea, 'No Members') || str_contains($sLinea, 'Members:'))
+            } elseif (strpos($sLinea, 'No Members') !== FALSE || strpos($sLinea, 'Members:') !== FALSE)
                 $bMembers = TRUE;
-            elseif (str_contains($sLinea, 'No Callers') || str_contains($sLinea, 'Callers:'))
+            elseif (strpos($sLinea, 'No Callers') !== FALSE || strpos($sLinea, 'Callers:') !== FALSE)
                 $bMembers = FALSE;
             elseif ($bMembers) {
 	        if (preg_match('/^\s*(\S+\/\S+)/', $sLinea, $regs) || preg_match('/^\s*\S+\s+\(\S+\s+from\s+(\S+\/\S+)\)/', $sLinea, $regs)) {

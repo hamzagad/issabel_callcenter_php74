@@ -61,11 +61,15 @@ function _moduleContent(&$smarty, $module_name)
     // Conexión a la base de datos CallCenter
     $pDB = new paloDB($arrConf['cadena_dsn']);
 
-    return match (getParameter('action')) {
-        'new_user' => nuevoUsuario($pDB, $smarty, $module_name, $local_templates_dir),
-        'edit_user' => editarUsuario($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir),
-    };
+    switch (getParameter('action')) {
+        case 'new_user':
+            return nuevoUsuario($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'edit_user':
+            return editarUsuario($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'list_user':
+        default:
+            return listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir);
+    }
 }
 
 function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
@@ -119,7 +123,7 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid->addNew("?menu=$module_name&action=new_user", _tr('New ECCP User'), true);
     $oGrid->deleteList('Are you sure to delete this user?', 'delete', _tr('Delete'));
     $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (!str_contains($sContenido, '<form'))
+    if (strpos($sContenido, '<form') === FALSE)
         $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
     return $sContenido;
 }

@@ -62,12 +62,20 @@ function _moduleContent(&$smarty, $module_name)
     $action = getAction();
     $content = "";
 
-    $content = match ($action) {
-        'create' => loadListContacts($smarty, $module_name, $local_templates_dir, $pDB, $arrConf),
-        'view' => viewList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf),
-        'getLists' => manejarMonitoreo_getList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf),
-        default => reportLists($smarty, $module_name, $local_templates_dir, $pDB, $arrConf),
-    };
+    switch($action){
+        case 'create':
+            $content = loadListContacts($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+        break;
+        case 'view':
+            $content = viewList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+        break;
+		case 'getLists':
+            $content = manejarMonitoreo_getList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+        break;
+		default:
+            $content = reportLists($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break;
+    }
     return $content;
 }
 
@@ -158,12 +166,20 @@ function reportLists($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
             $arrTmp[5] = htmlentities(utf8_encode($value['upload']), ENT_COMPAT, "UTF-8").'&nbsp;';
             $arrTmp[6] = '<span id="total_calls_'.$value['id'].'">'.htmlentities($value['total_calls'], ENT_COMPAT, "UTF-8").'</span>';;
             $arrTmp[7] = '<span id="pending_calls_'.$value['id'].'">'.htmlentities($value['pending_calls'], ENT_COMPAT, "UTF-8").'</span>';
-            $label_status = match ($value['status']) {
-                1 => '<span class="label label-success">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>',
-                2 => '<span class="label label-info">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>',
-                3 => '<span class="label label-default">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>',
-                default => htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'&nbsp;',
-            };
+            switch ($value['status']) {
+                case 1:
+                    $label_status = '<span class="label label-success">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>';
+                    break;
+                case 2:
+                    $label_status = '<span class="label label-info">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>';
+                    break;
+                case 3:
+                    $label_status = '<span class="label label-default">'.htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'</span>';
+                    break;
+                default:
+                    $label_status = htmlentities($value['sStatus'], ENT_COMPAT, "UTF-8").'&nbsp;';
+                    break;
+            }
             $arrTmp[8] = $label_status;
             $arrTmp[9] = htmlentities($value['date_entered'], ENT_COMPAT, "UTF-8").'&nbsp;';
             $arrTmp[10] = ($value['status'] == 3)

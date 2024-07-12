@@ -32,10 +32,10 @@ class paloContactInsert
     private $_sth_attribute;
     public $errMsg = NULL;
 
-    function __construct($db, private $_id_campaign, private $_list_name, private $_file_name)
+    function __construct($db, $_id_campaign, $_list_name, $_file_name)
     {
-        if ($db::class == 'paloDB') $db = $db->conn;
-        if ($db::class != 'PDO') die ('Expected PDO, got '.$db::class);
+        if (get_class($db) == 'paloDB') $db = $db->conn;
+        if (get_class($db) != 'PDO') die ('Expected PDO, got '.get_class($db));
         $this->_db = $db;
         $this->_contact_count = 0;
 
@@ -49,7 +49,7 @@ class paloContactInsert
             'INSERT INTO call_attribute (id_call, data) VALUES (?, ?)');
     }
 
-    function beforeBatchInsert(): bool {
+    function beforeBatchInsert() {
         $r = $this->_sth_list->execute(array($this->_id_campaign, utf8_decode($this->_list_name), utf8_decode($this->_file_name)));
         if (!$r) {
             $this->errMsg = _tr('On create list').': '.print_r($this->_sth_attribute->errorInfo(), TRUE);
@@ -110,7 +110,7 @@ class paloContactInsert
         return $idCall;
     }
 
-    function afterBatchInsert(): bool
+    function afterBatchInsert()
     {
         $sth = $this->_db->prepare('UPDATE campaign SET estatus = ? WHERE id = ? AND estatus = ?');
         $r = $sth->execute(array('A', $this->_id_campaign, 'T'));

@@ -80,11 +80,15 @@ function _moduleContent(&$smarty, $module_name)
     $contenidoModulo = '';
     $sAction = 'list_campaign';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
-    $contenidoModulo = match ($sAction) {
-        'graph_histogram' => graphHistogram($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listHistogram($pDB, $smarty, $module_name, $local_templates_dir),
-    };
-
+    switch ($sAction) {
+        case 'graph_histogram':
+            $contenidoModulo = graphHistogram($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'list_histogram':
+        default:
+            $contenidoModulo = listHistogram($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+    }
     return $contenidoModulo;
 }
 

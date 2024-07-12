@@ -45,10 +45,14 @@ function _moduleContent(&$smarty, $module_name)
         return '';
     }
     
-    return match (getParameter('action')) {
-        'preview' => vistaPreviaFormulario($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listarFormularios($pDB, $smarty, $module_name, $local_templates_dir),
-    };
+    switch (getParameter('action')) {
+        case 'preview':
+            return vistaPreviaFormulario($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'list':
+        default:
+            return listarFormularios($pDB, $smarty, $module_name, $local_templates_dir);
+    }
 }
 
 function listarFormularios($pDB, $smarty, $module_name, $local_templates_dir)

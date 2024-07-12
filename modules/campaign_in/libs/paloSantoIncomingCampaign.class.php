@@ -161,7 +161,7 @@ SQL_CAMPANIAS;
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function createEmptyCampaign($sNombre, $sQueue, $sFechaInicial, $sFechaFinal,
-        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL): ?int
+        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL)
     {
         $sNombre = trim($sNombre);
         $sQueue = trim($sQueue);
@@ -261,7 +261,7 @@ SQL_CAMPANIAS;
         return (int)$tupla[0];
     }
 
-    function addCampaignForm($idCampaign, $formularios): bool
+    function addCampaignForm($idCampaign, $formularios)
     {
         if (!ctype_digit("$idCampaign")) {
             $this->errMsg = _tr('(internal) Invalid campaign ID');
@@ -331,7 +331,7 @@ SQL_CAMPANIAS;
     }
 
     function updateCampaign($idCampaign, $sNombre, $sQueue, $sFechaInicial, $sFechaFinal,
-        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL): bool
+        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL)
     {
         $sNombre = trim($sNombre);
         $sQueue = trim($sQueue);
@@ -426,7 +426,7 @@ SQL_CAMPANIAS;
         return true;
     }
 
-    function delete_campaign($id_campaign): bool
+    function delete_campaign($id_campaign)
     {
         $listaSQL = array(
             // TODO: si se implementan contactos por campaña, meter SQL aquí

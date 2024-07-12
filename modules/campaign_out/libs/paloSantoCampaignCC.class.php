@@ -222,7 +222,7 @@ SQL_INSERT_CAMPAIGN;
      * @param	string		$formularios	los id de los formularios 1,2,.....,
      * @return	bool            true or false
     */
-    function addCampaignForm($id_campania,$formularios): bool
+    function addCampaignForm($id_campania,$formularios)
     {
         if (!is_array($formularios)) {
             $formularios = $formularios == '' ? array() : explode(',', $formularios);
@@ -297,7 +297,7 @@ SQL_INSERT_CAMPAIGN;
      *
      * @return	mixed	NULL en caso de error o número de teléfonos total
 	 */
-    function countCampaignNumbers($idCampaign): ?int
+    function countCampaignNumbers($idCampaign)
     {
     	$iNumTelefonos = NULL;
 
@@ -335,7 +335,7 @@ SQL_INSERT_CAMPAIGN;
      */
     function updateCampaign($idCampaign, $sNombre, $iMaxCanales, $iRetries, $sTrunk,
         $sContext, $sQueue, $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal,
-        $script, $id_url, $callerid): bool
+        $script, $id_url, $callerid)
     {
 
         $bExito = FALSE;
@@ -399,7 +399,7 @@ SQL_UPDATE_CAMPAIGN;
         return false;
     }
 
-    function activar_campaign($idCampaign, $activar): bool
+    function activar_campaign($idCampaign, $activar)
     {
         if (!$this->_DB->genQuery(
             'UPDATE campaign SET estatus = ? WHERE id = ?',
@@ -410,7 +410,7 @@ SQL_UPDATE_CAMPAIGN;
         return TRUE;
     }
 
-    function delete_campaign($idCampaign): bool
+    function delete_campaign($idCampaign)
     {
       $sql = <<<QUERY_SQL
         SELECT id FROM campaign_lists WHERE campaign_lists.id_campaign = ?;

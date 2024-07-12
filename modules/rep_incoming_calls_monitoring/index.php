@@ -65,10 +65,15 @@ function _moduleContent(&$smarty, $module_name)
         $sAction = '';
 
     $oPaloConsola = new PaloSantoConsola();
-    $sContenido = match ($sAction) {
-        'checkStatus' => manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola),
-        default => manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola),
-    };
+    switch ($sAction) {
+        case 'checkStatus':
+            $sContenido = manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+            break;
+        case '':
+        default:
+            $sContenido = manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+            break;
+    }
     $oPaloConsola->desconectarTodo();
 
     return $sContenido;
@@ -76,15 +81,19 @@ function _moduleContent(&$smarty, $module_name)
 
 function manejarMonitoreo_HTML_estiloestado($k)
 {
-    return match ($k) {
-        'total' => 'font-weight: bold;',
-        'abandoned' => 'color: #ff0000;',
-        'success' => 'color: #008800;',
-        default => '',
-    };
+    switch ($k) {
+        case 'total':
+            return 'font-weight: bold;';
+        case 'abandoned':
+            return 'color: #ff0000;';
+        case 'success':
+            return 'color: #008800;';
+        default:
+            return '';
+    }
 }
 
-function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola): string
+function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     global $arrLang;
     global $keylist;

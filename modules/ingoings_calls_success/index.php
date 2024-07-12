@@ -159,7 +159,7 @@ function _moduleContent(&$smarty, $module_name)
     return $oGrid->fetchGrid();
 }
 
-function format_time($iSec): string
+function format_time($iSec)
 {
     $iMin = ($iSec - ($iSec % 60)) / 60; $iSec %= 60;
     $iHora =  ($iMin - ($iMin % 60)) / 60; $iMin %= 60;

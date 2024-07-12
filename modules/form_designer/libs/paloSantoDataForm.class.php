@@ -139,7 +139,7 @@ class paloSantoDataForm
         return $campos;
     }
     
-    function activacionFormulario($id_formulario, $bEstado): bool
+    function activacionFormulario($id_formulario, $bEstado)
     {
         $bExito = $this->_db->genQuery(
             'UPDATE form SET estatus = ? WHERE id = ?',
@@ -151,7 +151,7 @@ class paloSantoDataForm
         return true;
     }
     
-    function eliminarFormulario($id_formulario): bool
+    function eliminarFormulario($id_formulario)
     {
         // Revisar si hay datos recolectados para este formulario
         foreach (array('form_data_recolected', 'form_data_recolected_entry') as $tabla) {
@@ -200,7 +200,7 @@ class paloSantoDataForm
         return TRUE;        
     }
     
-    function guardarFormulario($id, $nombre, $descripcion, $formfields): bool
+    function guardarFormulario($id, $nombre, $descripcion, $formfields)
     {
         if (!is_null($id) && !is_numeric($id)) {
             $this->errMsg = _tr('Error Id Form');

@@ -53,13 +53,19 @@ function _moduleContent(&$smarty, $module_name)
     // Mostrar pantalla correspondiente
     $sAction = 'list_agents';
     if (isset($_REQUEST['action'])) $sAction = $_REQUEST['action'];
-    return match ($sAction) {
-        'new_agent' => newAgent($pDB, $smarty, $module_name, $local_templates_dir),
-        'edit_agent' => editAgent($pDB, $smarty, $module_name, $local_templates_dir),
-        'reparar_file' => repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir),
-        'reparar_db' => repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listAgent($pDB, $smarty, $module_name, $local_templates_dir),
-    };
+    switch ($sAction) {
+        case 'new_agent':
+            return newAgent($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'edit_agent':
+            return editAgent($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'reparar_file':
+            return repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'reparar_db':
+            return repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'list_agents':
+        default:
+            return listAgent($pDB, $smarty, $module_name, $local_templates_dir);
+        };
 }
 
 function listAgent($pDB, $smarty, $module_name, $local_templates_dir)

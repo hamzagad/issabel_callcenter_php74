@@ -258,7 +258,7 @@ function reportReportedeTroncalesusadasporHoraeneldia($smarty, $module_name, $lo
             if ($bExportando)
                 return $oGrid->fetchGridCSV($arrGrid, $arrData);
             $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
-            if (!str_contains($sContenido, '<form'))
+            if (strpos($sContenido, '<form') === FALSE)
                 $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
             return $sContenido;
     }

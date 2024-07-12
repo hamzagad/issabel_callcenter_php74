@@ -152,12 +152,17 @@ function manejarLogin($module_name, &$smarty, $sDirLocalPlantillas)
     if (!in_array($sAction, array('', 'doLogin', 'checkLogin')))
         $sAction = '';
 
-    $sContenido = match ($sAction) {
-        'doLogin' => manejarLogin_doLogin(),
-        'checkLogin' => manejarLogin_checkLogin(),
-        default => manejarLogin_HTML($module_name, $smarty, $sDirLocalPlantillas),
-    };
-
+    switch ($sAction) {
+        case 'doLogin':
+            $sContenido = manejarLogin_doLogin();
+            break;
+        case 'checkLogin':
+            $sContenido = manejarLogin_checkLogin();
+            break;
+        default:
+            $sContenido = manejarLogin_HTML($module_name, $smarty, $sDirLocalPlantillas);
+            break;
+        }
     return $sContenido;
 }
 
@@ -1543,7 +1548,7 @@ function printflush($s)
  * La barra de color de la interfaz debe terminar en uno de tres estados:
  * llamada, break, ocioso.
  */
-function describirEstadoBarra($estado): string
+function describirEstadoBarra($estado)
 {
     if (!is_null($estado['calltype']))
         return 'llamada';

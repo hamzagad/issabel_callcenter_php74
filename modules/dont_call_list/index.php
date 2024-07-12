@@ -48,10 +48,13 @@ function _moduleContent(&$smarty, $module_name)
         $smarty->assign("mb_message", _tr('Error when connecting to database')." ".$pDB->errMsg);
     }
 
-    return match (getParameter('action')) {
-        'add' => agregarNumeros($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listarNumeros($pDB, $smarty, $module_name),
-    };
+    switch (getParameter('action')) {
+        case 'add':
+            return agregarNumeros($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'list':
+        default:
+            return listarNumeros($pDB, $smarty, $module_name);
+    }
 }
 
 function listarNumeros($pDB, $smarty, $module_name)

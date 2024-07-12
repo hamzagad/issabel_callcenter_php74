@@ -155,24 +155,24 @@ class Services_JSON
         }
 
         $bytes = (ord($utf16[0]) << 8) | ord($utf16[1]);
-        if ((0x7F & $bytes) == $bytes) {
-            // this case should never be reached, because we are in ASCII range
-            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-            return chr(0x7F & $bytes);
-        }
-        if ((0x07FF & $bytes) == $bytes) {
-            // return a 2-byte UTF-8 character
-            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-            return chr(0xC0 | (($bytes >> 6) & 0x1F))
-                 . chr(0x80 | ($bytes & 0x3F));
-        }
-        if ((0xFFFF & $bytes) == $bytes) {
-            // return a 3-byte UTF-8 character
-            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-            return chr(0xE0 | (($bytes >> 12) & 0x0F))
-                 . chr(0x80 | (($bytes >> 6) & 0x3F))
-                 . chr(0x80 | ($bytes & 0x3F));
-        }
+        switch(true) {
+            case ((0x7F & $bytes) == $bytes):
+                // this case should never be reached, because we are in ASCII range
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return chr(0x7F & $bytes);
+
+            case (0x07FF & $bytes) == $bytes:
+                // return a 2-byte UTF-8 character
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return chr(0xC0 | (($bytes >> 6) & 0x1F))
+                     . chr(0x80 | ($bytes & 0x3F));
+
+            case (0xFFFF & $bytes) == $bytes:
+                // return a 3-byte UTF-8 character
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return chr(0xE0 | (($bytes >> 12) & 0x0F))
+                     . chr(0x80 | (($bytes >> 6) & 0x3F))
+                     . chr(0x80 | ($bytes & 0x3F));        }
 
         // ignoring UTF-32 for now, sorry
         return '';
@@ -195,17 +195,30 @@ class Services_JSON
         if(function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($utf8, 'UTF-16', 'UTF-8');
         }
-        return match (strlen($utf8)) {
-            1 => $utf8,
-            2 => chr(0x07 & (ord($utf8[0]) >> 2))
-                 . chr((0xC0 & (ord($utf8[0]) << 6))
-                     | (0x3F & ord($utf8[1]))),
-            3 => chr((0xF0 & (ord($utf8[0]) << 4))
-                     | (0x0F & (ord($utf8[1]) >> 2)))
-                 . chr((0xC0 & (ord($utf8[1]) << 6))
-                     | (0x7F & ord($utf8[2]))),
-            default => '',
-        };
+        switch(strlen($utf8)) {
+            case 1:
+                // this case should never be reached, because we are in ASCII range
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return $utf8;
+
+            case 2:
+                // return a UTF-16 character from a 2-byte UTF-8 char
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return chr(0x07 & (ord($utf8[0]) >> 2))
+                     . chr((0xC0 & (ord($utf8[0]) << 6))
+                         | (0x3F & ord($utf8[1])));
+
+            case 3:
+                // return a UTF-16 character from a 3-byte UTF-8 char
+                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                return chr((0xF0 & (ord($utf8[0]) << 4))
+                         | (0x0F & (ord($utf8[1]) >> 2)))
+                     . chr((0xC0 & (ord($utf8[1]) << 6))
+                         | (0x7F & ord($utf8[2])));
+        }
+
+        // ignoring UTF-32 for now, sorry
+        return '';
     }
 
    /**
@@ -219,7 +232,7 @@ class Services_JSON
     * @return   mixed   JSON string representation of input var or an error if a problem occurs
     * @access   public
     */
-    function encode(mixed $var)
+    function encode($var)
     {
         switch (gettype($var)) {
             case 'boolean':
@@ -247,99 +260,93 @@ class Services_JSON
                 for ($c = 0; $c < $strlen_var; ++$c) {
 
                     $ord_var_c = ord($var[$c]);
-                    if ($ord_var_c == 0x08) {
-                        $ascii .= '\b';
-                        break;
-                    }
-                    if ($ord_var_c == 0x09) {
-                        $ascii .= '\t';
-                        break;
-                    }
-                    if ($ord_var_c == 0x0A) {
-                        $ascii .= '\n';
-                        break;
-                    }
-                    if ($ord_var_c == 0x0C) {
-                        $ascii .= '\f';
-                        break;
-                    }
-                    if ($ord_var_c == 0x0D) {
-                        $ascii .= '\r';
-                        break;
-                    }
-                    if ($ord_var_c == 0x22) {
-                    }
-                    if ($ord_var_c == 0x2F) {
-                    }
-                    if ($ord_var_c == 0x5C) {
-                        // double quote, slash, slosh
-                        $ascii .= '\\'.$var[$c];
-                        break;
-                    }
-                    if (($ord_var_c >= 0x20) && ($ord_var_c <= 0x7F)) {
-                        // characters U-00000000 - U-0000007F (same as ASCII)
-                        $ascii .= $var[$c];
-                        break;
-                    }
-                    if (($ord_var_c & 0xE0) == 0xC0) {
-                        // characters U-00000080 - U-000007FF, mask 110XXXXX
-                        // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                        $char = pack('C*', $ord_var_c, ord($var[$c + 1]));
-                        $c += 1;
-                        $utf16 = $this->utf82utf16($char);
-                        $ascii .= sprintf('\u%04s', bin2hex($utf16));
-                        break;
-                    }
-                    if (($ord_var_c & 0xF0) == 0xE0) {
-                        // characters U-00000800 - U-0000FFFF, mask 1110XXXX
-                        // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                        $char = pack('C*', $ord_var_c,
-                                     ord($var[$c + 1]),
-                                     ord($var[$c + 2]));
-                        $c += 2;
-                        $utf16 = $this->utf82utf16($char);
-                        $ascii .= sprintf('\u%04s', bin2hex($utf16));
-                        break;
-                    }
-                    if (($ord_var_c & 0xF8) == 0xF0) {
-                        // characters U-00010000 - U-001FFFFF, mask 11110XXX
-                        // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                        $char = pack('C*', $ord_var_c,
-                                     ord($var[$c + 1]),
-                                     ord($var[$c + 2]),
-                                     ord($var[$c + 3]));
-                        $c += 3;
-                        $utf16 = $this->utf82utf16($char);
-                        $ascii .= sprintf('\u%04s', bin2hex($utf16));
-                        break;
-                    }
-                    if (($ord_var_c & 0xFC) == 0xF8) {
-                        // characters U-00200000 - U-03FFFFFF, mask 111110XX
-                        // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                        $char = pack('C*', $ord_var_c,
-                                     ord($var[$c + 1]),
-                                     ord($var[$c + 2]),
-                                     ord($var[$c + 3]),
-                                     ord($var[$c + 4]));
-                        $c += 4;
-                        $utf16 = $this->utf82utf16($char);
-                        $ascii .= sprintf('\u%04s', bin2hex($utf16));
-                        break;
-                    }
-                    if (($ord_var_c & 0xFE) == 0xFC) {
-                        // characters U-04000000 - U-7FFFFFFF, mask 1111110X
-                        // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                        $char = pack('C*', $ord_var_c,
-                                     ord($var[$c + 1]),
-                                     ord($var[$c + 2]),
-                                     ord($var[$c + 3]),
-                                     ord($var[$c + 4]),
-                                     ord($var[$c + 5]));
-                        $c += 5;
-                        $utf16 = $this->utf82utf16($char);
-                        $ascii .= sprintf('\u%04s', bin2hex($utf16));
-                        break;
-                    }
+                    switch (true) {
+                        case $ord_var_c == 0x08:
+                            $ascii .= '\b';
+                            break;
+                        case $ord_var_c == 0x09:
+                            $ascii .= '\t';
+                            break;
+                        case $ord_var_c == 0x0A:
+                            $ascii .= '\n';
+                            break;
+                        case $ord_var_c == 0x0C:
+                            $ascii .= '\f';
+                            break;
+                        case $ord_var_c == 0x0D:
+                            $ascii .= '\r';
+                            break;
+
+                        case $ord_var_c == 0x22:
+                        case $ord_var_c == 0x2F:
+                        case $ord_var_c == 0x5C:
+                            // double quote, slash, slosh
+                            $ascii .= '\\'.$var[$c];
+                            break;
+
+                        case (($ord_var_c >= 0x20) && ($ord_var_c <= 0x7F)):
+                            // characters U-00000000 - U-0000007F (same as ASCII)
+                            $ascii .= $var[$c];
+                            break;
+
+                        case (($ord_var_c & 0xE0) == 0xC0):
+                            // characters U-00000080 - U-000007FF, mask 110XXXXX
+                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            $char = pack('C*', $ord_var_c, ord($var[$c + 1]));
+                            $c += 1;
+                            $utf16 = $this->utf82utf16($char);
+                            $ascii .= sprintf('\u%04s', bin2hex($utf16));
+                            break;
+
+                        case (($ord_var_c & 0xF0) == 0xE0):
+                            // characters U-00000800 - U-0000FFFF, mask 1110XXXX
+                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            $char = pack('C*', $ord_var_c,
+                                         ord($var[$c + 1]),
+                                         ord($var[$c + 2]));
+                            $c += 2;
+                            $utf16 = $this->utf82utf16($char);
+                            $ascii .= sprintf('\u%04s', bin2hex($utf16));
+                            break;
+
+                        case (($ord_var_c & 0xF8) == 0xF0):
+                            // characters U-00010000 - U-001FFFFF, mask 11110XXX
+                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            $char = pack('C*', $ord_var_c,
+                                         ord($var[$c + 1]),
+                                         ord($var[$c + 2]),
+                                         ord($var{$c + 3}));
+                            $c += 3;
+                            $utf16 = $this->utf82utf16($char);
+                            $ascii .= sprintf('\u%04s', bin2hex($utf16));
+                            break;
+
+                        case (($ord_var_c & 0xFC) == 0xF8):
+                            // characters U-00200000 - U-03FFFFFF, mask 111110XX
+                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            $char = pack('C*', $ord_var_c,
+                                         ord($var[$c + 1]),
+                                         ord($var[$c + 2]),
+                                         ord($var{$c + 3}),
+                                         ord($var{$c + 4}));
+                            $c += 4;
+                            $utf16 = $this->utf82utf16($char);
+                            $ascii .= sprintf('\u%04s', bin2hex($utf16));
+                            break;
+
+                        case (($ord_var_c & 0xFE) == 0xFC):
+                            // characters U-04000000 - U-7FFFFFFF, mask 1111110X
+                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            $char = pack('C*', $ord_var_c,
+                                         ord($var[$c + 1]),
+                                         ord($var[$c + 2]),
+                                         ord($var{$c + 3}),
+                                         ord($var{$c + 4}),
+                                         ord($var{$c + 5}));
+                            $c += 5;
+                            $utf16 = $this->utf82utf16($char);
+                            $ascii .= sprintf('\u%04s', bin2hex($utf16));
+                            break;                    }
                 }
 
                 return '"'.$ascii.'"';
@@ -365,7 +372,7 @@ class Services_JSON
 
                 // treat as a JSON object
                 if (is_array($var) && count($var) && (array_keys($var) !== range(0, count($var) - 1))) {
-                    $properties = array_map(function (string $name, $value) : string {
+                    $properties = array_map(function (string $name, $value) {
                         return $this->name_value($name, $value);
                     },
                                             array_keys($var),
@@ -396,7 +403,7 @@ class Services_JSON
             case 'object':
                 $vars = get_object_vars($var);
 
-                $properties = array_map(function (string $name, $value) : string {
+                $properties = array_map(function (string $name, $value) {
                     return $this->name_value($name, $value);
                 },
                                         array_keys($vars),
@@ -426,7 +433,7 @@ class Services_JSON
     * @return   string  JSON-formatted name-value pair, like '"name":value'
     * @access   private
     */
-    function name_value($name, mixed $value)
+    function name_value($name, $value)
     {
         $encoded_value = $this->encode($value);
 
@@ -445,7 +452,7 @@ class Services_JSON
     * @return   string  string value stripped of comments and whitespace
     * @access   private
     */
-    function reduce_string($str): string
+    function reduce_string($str)
     {
         $str = preg_replace(array(
 
@@ -516,90 +523,84 @@ class Services_JSON
 
                         $substr_chrs_c_2 = substr($chrs, $c, 2);
                         $ord_chrs_c = ord($chrs[$c]);
-                        if ($substr_chrs_c_2 == '\b') {
-                            $utf8 .= chr(0x08);
-                            ++$c;
-                            break;
-                        }
-                        if ($substr_chrs_c_2 == '\t') {
-                            $utf8 .= chr(0x09);
-                            ++$c;
-                            break;
-                        }
-                        if ($substr_chrs_c_2 == '\n') {
-                            $utf8 .= chr(0x0A);
-                            ++$c;
-                            break;
-                        }
-                        if ($substr_chrs_c_2 == '\f') {
-                            $utf8 .= chr(0x0C);
-                            ++$c;
-                            break;
-                        }
-                        if ($substr_chrs_c_2 == '\r') {
-                            $utf8 .= chr(0x0D);
-                            ++$c;
-                            break;
-                        }
-                        if ($substr_chrs_c_2 == '\\"') {
-                        }
-                        if ($substr_chrs_c_2 == '\\\'') {
-                        }
-                        if ($substr_chrs_c_2 == '\\\\') {
-                        }
-                        if ($substr_chrs_c_2 == '\\/') {
-                            if (($delim == '"' && $substr_chrs_c_2 != '\\\'') ||
-                               ($delim == "'" && $substr_chrs_c_2 != '\\"')) {
-                                $utf8 .= $chrs[++$c];
-                            }
-                            break;
-                        }
-                        if (preg_match('/\\\u[0-9A-F]{4}/i', substr($chrs, $c, 6))) {
-                            // single, escaped unicode character
-                            $utf16 = chr(hexdec(substr($chrs, ($c + 2), 2)))
-                                   . chr(hexdec(substr($chrs, ($c + 4), 2)));
-                            $utf8 .= $this->utf162utf8($utf16);
-                            $c += 5;
-                            break;
-                        }
-                        if (($ord_chrs_c >= 0x20) && ($ord_chrs_c <= 0x7F)) {
-                            $utf8 .= $chrs[$c];
-                            break;
-                        }
-                        if (($ord_chrs_c & 0xE0) == 0xC0) {
-                            // characters U-00000080 - U-000007FF, mask 110XXXXX
-                            //see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                            $utf8 .= substr($chrs, $c, 2);
-                            ++$c;
-                            break;
-                        }
-                        if (($ord_chrs_c & 0xF0) == 0xE0) {
-                            // characters U-00000800 - U-0000FFFF, mask 1110XXXX
-                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                            $utf8 .= substr($chrs, $c, 3);
-                            $c += 2;
-                            break;
-                        }
-                        if (($ord_chrs_c & 0xF8) == 0xF0) {
-                            // characters U-00010000 - U-001FFFFF, mask 11110XXX
-                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                            $utf8 .= substr($chrs, $c, 4);
-                            $c += 3;
-                            break;
-                        }
-                        if (($ord_chrs_c & 0xFC) == 0xF8) {
-                            // characters U-00200000 - U-03FFFFFF, mask 111110XX
-                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                            $utf8 .= substr($chrs, $c, 5);
-                            $c += 4;
-                            break;
-                        }
-                        if (($ord_chrs_c & 0xFE) == 0xFC) {
-                            // characters U-04000000 - U-7FFFFFFF, mask 1111110X
-                            // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                            $utf8 .= substr($chrs, $c, 6);
-                            $c += 5;
-                            break;
+                        switch (true) {
+                            case $substr_chrs_c_2 == '\b':
+                                $utf8 .= chr(0x08);
+                                ++$c;
+                                break;
+                            case $substr_chrs_c_2 == '\t':
+                                $utf8 .= chr(0x09);
+                                ++$c;
+                                break;
+                            case $substr_chrs_c_2 == '\n':
+                                $utf8 .= chr(0x0A);
+                                ++$c;
+                                break;
+                            case $substr_chrs_c_2 == '\f':
+                                $utf8 .= chr(0x0C);
+                                ++$c;
+                                break;
+                            case $substr_chrs_c_2 == '\r':
+                                $utf8 .= chr(0x0D);
+                                ++$c;
+                                break;
+
+                            case $substr_chrs_c_2 == '\\"':
+                            case $substr_chrs_c_2 == '\\\'':
+                            case $substr_chrs_c_2 == '\\\\':
+                            case $substr_chrs_c_2 == '\\/':
+                                if (($delim == '"' && $substr_chrs_c_2 != '\\\'') ||
+                                   ($delim == "'" && $substr_chrs_c_2 != '\\"')) {
+                                    $utf8 .= $chrs[++$c];
+                                }
+                                break;
+
+                            case preg_match('/\\\u[0-9A-F]{4}/i', substr($chrs, $c, 6)):
+                                // single, escaped unicode character
+                                $utf16 = chr(hexdec(substr($chrs, ($c + 2), 2)))
+                                       . chr(hexdec(substr($chrs, ($c + 4), 2)));
+                                $utf8 .= $this->utf162utf8($utf16);
+                                $c += 5;
+                                break;
+
+                            case ($ord_chrs_c >= 0x20) && ($ord_chrs_c <= 0x7F):
+                                $utf8 .= $chrs[$c];
+                                break;
+
+                            case ($ord_chrs_c & 0xE0) == 0xC0:
+                                // characters U-00000080 - U-000007FF, mask 110XXXXX
+                                //see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                                $utf8 .= substr($chrs, $c, 2);
+                                ++$c;
+                                break;
+
+                            case ($ord_chrs_c & 0xF0) == 0xE0:
+                                // characters U-00000800 - U-0000FFFF, mask 1110XXXX
+                                // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                                $utf8 .= substr($chrs, $c, 3);
+                                $c += 2;
+                                break;
+
+                            case ($ord_chrs_c & 0xF8) == 0xF0:
+                                // characters U-00010000 - U-001FFFFF, mask 11110XXX
+                                // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                                $utf8 .= substr($chrs, $c, 4);
+                                $c += 3;
+                                break;
+
+                            case ($ord_chrs_c & 0xFC) == 0xF8:
+                                // characters U-00200000 - U-03FFFFFF, mask 111110XX
+                                // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                                $utf8 .= substr($chrs, $c, 5);
+                                $c += 4;
+                                break;
+
+                            case ($ord_chrs_c & 0xFE) == 0xFC:
+                                // characters U-04000000 - U-7FFFFFFF, mask 1111110X
+                                // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                                $utf8 .= substr($chrs, $c, 6);
+                                $c += 5;
+                                break;
                         }
 
                     }
@@ -764,8 +765,7 @@ class Services_JSON
     {
         if (class_exists('pear')) {
             return PEAR::isError($data, $code);
-        } elseif (is_object($data) && ($data::class == 'services_json_error' ||
-                                 is_subclass_of($data, 'services_json_error'))) {
+        } elseif (is_object($data) && (get_class($data) == 'services_json_error' || is_subclass_of($data, 'services_json_error'))) {
             return true;
         }
 

@@ -177,7 +177,7 @@ class paloSantoCallsDetail
      *      9   transferencia
      *     10   estado final de la llamada
      */
-    function & leerDetalleLlamadas(mixed $param, mixed $limit = NULL, mixed $offset = 0)
+    function & leerDetalleLlamadas($param, $limit = NULL, $offset = 0)
     {
         if (!is_array($param)) {
             $this->errMsg = '(internal) Invalid parameter array';
@@ -283,7 +283,7 @@ SQL_OUTGOING;
      *
      * @return  mixed   NULL en caso de error, o cuenta de registros.
      */
-    function contarDetalleLlamadas(mixed $param)
+    function contarDetalleLlamadas($param)
     {
         if (!is_array($param)) {
             $this->errMsg = '(internal) Invalid parameter array';

@@ -58,13 +58,21 @@ function _moduleContent(&$smarty, $module_name)
     $contenidoModulo = '';
     $sAction = 'list_campaign';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
-    $contenidoModulo = match ($sAction) {
-        'new_campaign' => newCampaign($pDB, $smarty, $module_name, $local_templates_dir),
-        'edit_campaign' => editCampaign($pDB, $smarty, $module_name, $local_templates_dir),
-        'csv_data' => displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listCampaign($pDB, $smarty, $module_name, $local_templates_dir),
-    };
-
+    switch ($sAction) {
+        case 'new_campaign':
+            $contenidoModulo = newCampaign($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'edit_campaign':
+            $contenidoModulo = editCampaign($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'csv_data':
+            $contenidoModulo = displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'list_campaign':
+        default:
+            $contenidoModulo = listCampaign($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        }
     return $contenidoModulo;
 }
 

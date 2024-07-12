@@ -242,7 +242,7 @@ function generarComboColasEntrantes($oCalls)
 	return $comboColas + $oCalls->leerColasEntrantesValidas();
 }
 
-function format_time($iSec): string
+function format_time($iSec)
 {
     $iMin = ($iSec - ($iSec % 60)) / 60; $iSec %= 60;
     $iHora =  ($iMin - ($iMin % 60)) / 60; $iMin %= 60;

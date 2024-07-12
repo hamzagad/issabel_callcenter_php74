@@ -53,11 +53,16 @@ function _moduleContent(&$smarty, $module_name)
         $smarty->assign("mb_message", _tr('Error when connecting to database')." ".$pDB->errMsg);
     }
     
-    return match (getParameter('action')) {
-        'add', 'edit' => modificarFormulario($pDB, $smarty, $module_name, $local_templates_dir),
-        'save' => guardarFormulario($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listarFormularios($pDB, $smarty, $module_name, $local_templates_dir),
-    };
+    switch (getParameter('action')) {
+        case 'add':
+        case 'edit':
+            return modificarFormulario($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'save':
+            return guardarFormulario($pDB, $smarty, $module_name, $local_templates_dir);
+        case 'list':
+        default:
+            return listarFormularios($pDB, $smarty, $module_name, $local_templates_dir);
+    }
 }
 
 function listarFormularios($pDB, $smarty, $module_name, $local_templates_dir)

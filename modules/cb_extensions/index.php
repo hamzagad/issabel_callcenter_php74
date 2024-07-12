@@ -53,12 +53,18 @@ function _moduleContent(&$smarty, $module_name)
     $sAction = 'list_agents';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
 
-    $contenidoModulo = match ($sAction) {
-        'new_agent' => newAgent($pDB, $smarty, $module_name, $local_templates_dir),
-        'edit_agent' => editAgent($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listAgent($pDB, $smarty, $module_name, $local_templates_dir),
-    };
-
+    switch ($sAction) {
+        case 'new_agent':
+            $contenidoModulo = newAgent($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'edit_agent':
+            $contenidoModulo = editAgent($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'list_agents':
+        default:
+            $contenidoModulo = listAgent($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+    }
     return $contenidoModulo;
 }
 

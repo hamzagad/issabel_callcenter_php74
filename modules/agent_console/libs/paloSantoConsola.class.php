@@ -167,7 +167,7 @@ class PaloSantoConsola
         if (!is_null($this->_eccp)) {
             try {
                 $this->_eccp->disconnect();
-            } catch (Exception) {}
+            } catch (Exception $e) {}
             $this->_eccp = NULL;
         }
     }

@@ -54,12 +54,18 @@ function _moduleContent(&$smarty, $module_name)
     $contenidoModulo = '';
     $sAction = 'list_urls';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
-    $contenidoModulo = match ($sAction) {
-        'new_url' => newURL($pDB, $smarty, $module_name, $local_templates_dir),
-        'edit_url' => editURL($pDB, $smarty, $module_name, $local_templates_dir),
-        default => listURL($pDB, $smarty, $module_name, $local_templates_dir),
-    };
-
+    switch ($sAction) {
+        case 'new_url':
+            $contenidoModulo = newURL($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'edit_url':
+            $contenidoModulo = editURL($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+        case 'list_urls':
+        default:
+            $contenidoModulo = listURL($pDB, $smarty, $module_name, $local_templates_dir);
+            break;
+    }
     return $contenidoModulo;
 }
 

@@ -284,7 +284,7 @@ NO_QUEUE_END;
         if ($bExportando)
             return $oGrid->fetchGridCSV($arrGrid, $arrData);
         $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
-        if (!str_contains($sContenido, '<form'))
+        if (strpos($sContenido, '<form') === FALSE)
             $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
         return $sContenido;
     }        
@@ -309,7 +309,7 @@ function leerColasEntrantes($pDB, $pDB_asterisk)
     return $arrQueue;
 }
 
-function formatoSegundos($s): string
+function formatoSegundos($s)
 {
     $sec = $s % 60; $s = ($s - $sec) / 60;
     $min = $s % 60; $hora = ($s - $min) / 60;

@@ -208,7 +208,7 @@ function reportReportsBreak($smarty, $module_name, $local_templates_dir, &$pDB)
         if ($bExportando)
             return $oGrid->fetchGridCSV($arrGrid, $arrData);
         $sContenido = $oGrid->fetchGrid($arrGrid, $arrData);
-        if (!str_contains($sContenido, '<form'))
+        if (strpos($sContenido, '<form') === FALSE)
             $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
         return $sContenido;
     }
@@ -241,12 +241,12 @@ function createFieldFilter()
 }
 
 
-function getAction(): string
+function getAction()
 {
     return "report"; 
 }
 
-function formatoSegundos($iSeg): string
+function formatoSegundos($iSeg)
 {
     $iHora = $iMinutos = $iSegundos = 0;
     $iSegundos = $iSeg % 60; $iSeg = ($iSeg - $iSegundos) / 60;

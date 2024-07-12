@@ -80,10 +80,12 @@ function _moduleContent(&$smarty, $module_name)
     $contenidoModulo = '';
     $sAction = 'list_campaign';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
-    $contenidoModulo = match ($sAction) {
-        default => listHistogram($pDB, $smarty, $module_name, $local_templates_dir),
-    };
-
+    switch ($sAction) {
+        case 'list_histogram':
+        default:
+            $contenidoModulo = listHistogram($pDB, $smarty, $module_name, $local_templates_dir);
+        break;
+    }
     return $contenidoModulo;
 }
 

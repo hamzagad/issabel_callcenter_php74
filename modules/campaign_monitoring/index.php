@@ -50,13 +50,24 @@ function _moduleContent(&$smarty, $module_name)
 
     $sContenido = '';
 
-    $sContenido = match (getParameter('action')) {
-        'getCampaigns' => manejarMonitoreo_getCampaigns($module_name, $smarty, $local_templates_dir),
-        'getCampaignDetail' => manejarMonitoreo_getCampaignDetail($module_name, $smarty, $local_templates_dir),
-        'checkStatus' => manejarMonitoreo_checkStatus($module_name, $smarty, $local_templates_dir),
-        'loadPreviousLogEntries' => manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $local_templates_dir),
-        default => manejarMonitoreo_HTML($module_name, $smarty, $local_templates_dir),
-    };
+    // Procesar los eventos AJAX.
+    switch (getParameter('action')) {
+        case 'getCampaigns':
+            $sContenido = manejarMonitoreo_getCampaigns($module_name, $smarty, $local_templates_dir);
+            break;
+        case 'getCampaignDetail':
+            $sContenido = manejarMonitoreo_getCampaignDetail($module_name, $smarty, $local_templates_dir);
+            break;
+        case 'checkStatus':
+            $sContenido = manejarMonitoreo_checkStatus($module_name, $smarty, $local_templates_dir);
+            break;
+        case 'loadPreviousLogEntries':
+            $sContenido = manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $local_templates_dir);
+            break;
+        default:
+            // Página principal con plantilla
+            $sContenido = manejarMonitoreo_HTML($module_name, $smarty, $local_templates_dir);
+        }
     return $sContenido;
 }
 
@@ -773,7 +784,7 @@ function formatoLlamadaNoConectada($activecall)
     $sFechaHoy = date('Y-m-d');
     $sDesde = (is_null($activecall['queuestart']))
         ? $activecall['dialstart'] : $activecall['queuestart'];
-    if (str_starts_with($sDesde, $sFechaHoy))
+    if (strpos($sDesde, $sFechaHoy) === 0)
         $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
     $sEstado = ($activecall['callstatus'] == 'placing' && !is_null($activecall['trunk']))
         ? _tr('dialing') : _tr($activecall['callstatus']);
@@ -860,10 +871,10 @@ function modificarReferenciasLibreriasJS($smarty)
      */
     $sEmberRef = $sHandleBarsRef = NULL;
     foreach (array_keys($listaLibsJS_modulo) as $k) {
-    	if (str_contains($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-')) {
+    	if (strpos($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-') !== FALSE) {
             $sHandleBarsRef = $listaLibsJS_modulo[$k];
             unset($listaLibsJS_modulo[$k]);
-        } elseif (str_contains($listaLibsJS_modulo[$k], 'themes/default/js/ember-')) {
+        } elseif (strpos($listaLibsJS_modulo[$k], 'themes/default/js/ember-') !== FALSE) {
             $sEmberRef = $listaLibsJS_modulo[$k];
             unset($listaLibsJS_modulo[$k]);
         }

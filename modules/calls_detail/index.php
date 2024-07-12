@@ -46,11 +46,13 @@ function _moduleContent(&$smarty, $module_name)
 
     $pDB = new paloDB($cadena_dsn);
 
-    return match (getParameter('action')) {
-        'download' => downloadRecording($smarty, $module_name, $pDB),
-        default => reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir),
-    };
-}
+    switch (getParameter('action')) {
+        case 'download':
+            return downloadRecording($smarty, $module_name, $pDB);
+        default:
+            return reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir);
+        }
+    }
 
 function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
 {
@@ -309,7 +311,7 @@ function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
         if ($bExportando)
             return $oGrid->fetchGridCSV($arrGrid, $arrData);
         $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
-        if (!str_contains($sContenido, '<form'))
+        if (strpos($sContenido, '<form') === FALSE)
             $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
         return $sContenido;
     }
@@ -333,7 +335,7 @@ function downloadRecording($smarty, $module_name, $pDB)
             return 'Not Found';
         }
     } elseif (!file_exists($path[0])) {
-        if (str_ends_with($path[0], '.wav49')) {
+        if (substr($path[0], -6) == '.wav49') {
             // Archivo .wav49 realmente tiene extensión .WAV
             $path[0] = substr($path[0], 0, strlen($path[0]) - 6).'.WAV';
             $path[1] = substr($path[1], 0, strlen($path[1]) - 6).'.WAV';
@@ -467,7 +469,7 @@ function createFieldFilter($comboAgentes, $comboColas, $arrCallType, $campaignIn
     );
 }
 
-function formatoSegundos($iSeg): string
+function formatoSegundos($iSeg)
 {
     $iHora = $iMinutos = $iSegundos = 0;
     $iSegundos = $iSeg % 60; $iSeg = ($iSeg - $iSegundos) / 60;

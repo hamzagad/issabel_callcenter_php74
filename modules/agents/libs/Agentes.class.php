@@ -456,7 +456,7 @@ class Agentes
             foreach ($lineas as $sLinea) {
                 // El primer número de la línea es el ID del agente a recuperar
                 $regs = NULL;
-                if (!str_contains($sLinea, 'agents online') &&
+                if (strpos($sLinea, 'agents online') === FALSE && 
                     preg_match('/^([[:digit:]]+)[[:space:]]*/', $sLinea, $regs)) {
                     $listaAgentes[] = $regs[1];
                 }
@@ -475,11 +475,14 @@ class Agentes
             $astman->disconnect();
             $data = $strAgentsOnline['data'];
             $res = explode($agentNum,$data);
-            return is_array($res) && count($res)==2;
+            if(is_array($res) && count($res)==2) {
+                return true;
+            }
+            return false;
         }
     }
 
-    function desconectarAgentes($arrAgentes): bool
+    function desconectarAgentes($arrAgentes)
     {
         $this->errMsg = NULL;
 

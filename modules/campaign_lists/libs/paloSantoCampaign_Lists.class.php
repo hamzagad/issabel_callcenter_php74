@@ -327,7 +327,7 @@ SQL_QUERY;
         return $campaignsOutgoing;
     }
 
-    function delete_list($idList): bool
+    function delete_list($idList)
     {
         $listaSQL = array(
             'DELETE FROM call_recording WHERE id_call_outgoing IN (SELECT id from calls WHERE id_list = ?)',
