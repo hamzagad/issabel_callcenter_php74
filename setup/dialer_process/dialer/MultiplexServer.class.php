@@ -24,9 +24,9 @@
 class MultiplexServer
 {
     protected $_oLog;        // Objeto log para reportar problemas
-    protected $_hEscucha = FALSE;    // Socket de escucha para nuevas conexiones
-    private $_conexiones = array();    // Lista de conexiones atendidas con clientes
-    private $_uniqueid = 0;
+    protected $_hEscucha;    // Socket de escucha para nuevas conexiones
+    private $_conexiones;    // Lista de conexiones atendidas con clientes
+    private $_uniqueid;
 
     // Lista de objetos escucha, de tipos variados
     protected $_listaConn = array();
@@ -43,7 +43,10 @@ class MultiplexServer
     function __construct($sUrlSocket, &$oLog)
     {
         $this->_oLog =& $oLog;
+        $this->_conexiones = array();
+        $this->_uniqueid = 0;
         $errno = $errstr = NULL;
+        $this->_hEscucha = FALSE;
         if (!is_null($sUrlSocket)) {
             $this->_hEscucha = stream_socket_server($sUrlSocket, $errno, $errstr);
             if (!$this->_hEscucha) {

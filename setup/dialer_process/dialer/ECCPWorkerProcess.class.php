@@ -47,7 +47,7 @@ class ECCPWorkerProcess extends TuberiaProcess
     private $_eccpconn;
     private $_numPeticionesAtendidas = 0;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
+    public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -171,7 +171,7 @@ class ECCPWorkerProcess extends TuberiaProcess
         return !$this->_finalizandoPrograma;
     }
 
-    public function limpiezaDemonio($signum = null)
+    public function limpiezaDemonio($signum)
     {
 
         // Mandar a cerrar todas las conexiones activas

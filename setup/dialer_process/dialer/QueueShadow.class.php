@@ -27,14 +27,14 @@ require_once __DIR__ . '/Agente.class.php';
 class QueueShadow
 {
     public $DEBUG = FALSE;
-
+    private $_log;
     private $_queues = array();
     private $_queueflags = NULL;
 
-    function __construct($_log)
+    function __construct($log)
     {
+        $this->_log = $log;
     }
-
     /**
      * Método para iniciar el modo de enumeración de la información de las
      * colas. Se invalidan todos los elementos esperando que los eventos

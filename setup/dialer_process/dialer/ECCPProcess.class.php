@@ -32,7 +32,7 @@ class ECCPProcess extends TuberiaProcess
      * desconectadas. */
     private $_finalizandoPrograma = FALSE;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
+    public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
     	$this->_log = $oMainLog;
         $this->_multiplex = new ECCPServer('tcp://0.0.0.0:20005', $this->_log, $this->_tuberia);
@@ -48,9 +48,7 @@ class ECCPProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
-        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', function ($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos) {
-            return $this->msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos);
-        });
+        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 
         // Se ha tenido éxito si se están escuchando conexiones
         return $this->_multiplex->escuchaActiva();
@@ -66,7 +64,7 @@ class ECCPProcess extends TuberiaProcess
     	return TRUE;
     }
 
-    public function limpiezaDemonio($signum = null)
+    public function limpiezaDemonio($signum)
     {
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
@@ -91,9 +89,7 @@ class ECCPProcess extends TuberiaProcess
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
-        call_user_func_array(function ($k, $v) {
-            return $this->_actualizarConfig($k, $v);
-        }, $datos);
+        call_user_func_array(array($this, '_actualizarConfig'), $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

@@ -67,7 +67,7 @@ class CampaignProcess extends TuberiaProcess
      */
     private $_finalizandoPrograma = FALSE;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
+    public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -107,9 +107,7 @@ class CampaignProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
-        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', function ($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos) {
-            return $this->msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos);
-        });
+        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 
         $this->DEBUG = $this->_configDB->dialer_debug;
         return TRUE;
@@ -551,7 +549,7 @@ PETICION_CAMPANIAS_ENTRANTES;
 //añadido por hgmnetwork.com 26-06-2018 para forzar mas llamadas por agente
 //miramos si como mínimo hay 1 llamada por hacer que fuerce mas, si es 0 llamadas ignora para no hacer llamadas sin agentes libres o apunto
 if ($iNumLlamadasColocar>0){
-$iNumLlamadasColocar += $this->_configDB->dialer_forzar_sobrecolocar;
+    $iNumLlamadasColocar= $iNumLlamadasColocar + $this->_configDB->dialer_forzar_sobrecolocar;
 };
  $this->_log->output('DEBUG: '.__METHOD__." (campania {$infoCampania['id']} ".
                 "cola {$infoCampania['queue']}): resumen de predicción:\n".
@@ -968,7 +966,8 @@ PETICION_AGENTES_AGENDADOS;
             $sFechaSys,
             $sHoraFinal,
             $sHoraInicio));
-        return $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
+            $listaAgentes = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
+            return $listaAgentes;
     }
 
     /**
@@ -1334,9 +1333,7 @@ PETICION_LLAMADAS_AGENTE;
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
-        call_user_func_array(function ($sAgente, $id_campania) {
-            return $this->_verificarFinLlamadasAgendables($sAgente, $id_campania);
-        }, $datos);
+        call_user_func_array(array($this, '_verificarFinLlamadasAgendables'), $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

@@ -23,12 +23,22 @@
 
 class Llamada 
 {
+    // Relaciones con otros objetos conocidos
+    private $_log;
+    private $_tuberia;
+
+    // Referencia a contenedor de llamadas e índice dentro del contenedor
+    private $_listaLlamadas;
+
     // Agente que está atendiendo la llamada, o NULL para llamada sin atender
     public $agente = NULL;
 
     // Campaña a la que pertenece la llamada, o NULL para llamada entrante sin campaña
     public $campania = NULL;
 
+    // Propiedades específicas de la llamada
+    // Tipo de llamada, 'incoming', 'outgoing'
+    private $_tipo_llamada;
     /* ID en la base de datos de la llamada, o NULL para llamada entrante sin
      * registrar. Esta propiedad es una de las propiedades indexables en
      * ListaLlamadas, junto con _tipo_llamada */
@@ -155,17 +165,12 @@ class Llamada
     private $_mutedchannels = array();
 
     // Este constructor sólo debe invocarse desde ListaLlamadas::nuevaLlamada()
-    function __construct(
-        // Referencia a contenedor de llamadas e índice dentro del contenedor
-        ListaLlamadas $_listaLlamadas,
-        // Propiedades específicas de la llamada
-        // Tipo de llamada, 'incoming', 'outgoing'
-        $_tipo_llamada,
-        $_tuberia,
-        // Relaciones con otros objetos conocidos
-        $_log
-    )
+    function __construct(ListaLlamadas $lista, $tipo_llamada, $tuberia, $log)
     {
+    	$this->_listaLlamadas = $lista;
+        $this->_tipo_llamada = $tipo_llamada;
+        $this->_tuberia = $tuberia;
+        $this->_log = $log;
     }
 
     private function _nul($i) { return is_null($i) ? '(ninguno)' : "$i"; }
@@ -554,9 +559,7 @@ class Llamada
             $sDialstring = $this->dialstring;
         }
 
-        $callable = function ($r, $sFuente, $timestamp, $retry, $trunk) {
-            return $this->_cb_Originate($r, $sFuente, $timestamp, $retry, $trunk);
-        };
+        $callable = array($this, '_cb_Originate');
         $callable_params = array($sFuente, $timestamp, $retry, $trunk);
         $ami->asyncOriginate(
             $callable, $callable_params,
@@ -1174,9 +1177,7 @@ class Llamada
 
     public function mandarLlamadaHold($ami, $sFuente, $timestamp)
     {
-        $callable = function ($r, $sFuente, $ami, $timestamp) {
-            return $this->_cb_Park($r, $sFuente, $ami, $timestamp);
-        };
+        $callable = array($this, '_cb_Park');
         $call_params = array($sFuente, $ami, $timestamp);
         //$this->_log->output('DEBUG: '.__METHOD__.": asyncPark({$this->actualchannel}, {$this->agentchannel})");
         $ami->asyncPark(

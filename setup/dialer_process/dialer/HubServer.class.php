@@ -62,9 +62,7 @@ class HubServer extends MultiplexServer
     {
     	foreach ($this->_tuberias as $t) {
             $t->registrarMultiplexPadre($this);
-            $t->registrarManejador('*', '*', function ($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos) {
-                return $this->rutearMensaje($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos);
-            });
+            $t->registrarManejador('*', '*', array($this, 'rutearMensaje'));
         }
     }
 
@@ -97,9 +95,7 @@ class HubServer extends MultiplexServer
     function enviarFinalizacion()
     {
         foreach ($this->_tuberias as $k => $t) {
-            $t->registrarManejador('*', 'finalizacionTerminada', function ($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos) {
-                return $this->msg_finalizacionTerminada($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos);
-            });
+            $t->registrarManejador('*', 'finalizacionTerminada', array($this, 'msg_finalizacionTerminada'));
             $t->enviarMensajeDesdeFuente('HubProcess', $k, 'finalizando', NULL);
         }
     }

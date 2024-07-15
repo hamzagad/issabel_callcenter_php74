@@ -53,7 +53,7 @@ class SQLWorkerProcess extends TuberiaProcess
 
     private $_finalizandoPrograma = FALSE;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
+    public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
         $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
@@ -91,9 +91,7 @@ class SQLWorkerProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
-        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', function ($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos) {
-            return $this->msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos);
-        });
+        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 
         $this->DEBUG = $this->_configDB->dialer_debug;
 
@@ -264,7 +262,7 @@ class SQLWorkerProcess extends TuberiaProcess
         }
     }
 
-    public function limpiezaDemonio($signum = null)
+    public function limpiezaDemonio($signum)
     {
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
@@ -809,15 +807,17 @@ class SQLWorkerProcess extends TuberiaProcess
     private function _sqlupdatestatcampaign($id_campaign, $num_completadas,
             $promedio, $desviacion)
     {
+        $eventos = array();
         $sth = $this->_db->prepare(
             'UPDATE campaign SET num_completadas = ?, promedio = ?, desviacion = ? WHERE id = ?');
         $sth->execute(array($num_completadas, $promedio, $desviacion, $id_campaign));
 
-        return array();
+        return $eventos;
     }
 
     private function _agregarArchivoGrabacion($tipo_llamada, $id_llamada, $uniqueid, $channel, $recordingfile)
     {
+        $eventos = array();
         // TODO: configurar prefijo de monitoring
         $sDirBaseMonitor = '/var/spool/asterisk/monitor/';
 
@@ -839,7 +839,7 @@ class SQLWorkerProcess extends TuberiaProcess
             $sth->execute(array($id_llamada, $uniqueid, $channel, $recordingfile));
         }
 
-        return array();
+        return $eventos;
     }
 
     private function _AgentLogin($sAgente, $iTimestampLogin, $id_agent)
@@ -961,9 +961,13 @@ SQL_EXISTE_AUDIT;
         return $eventos;
     }
 
-    private function _AgentUnlinked($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone, $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso)
+    private function _AgentUnlinked($sAgente, $sTipoLlamada, $idCampaign,
+    $idLlamada, $sPhone, $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso)
     {
-        return [array(), array(
+        $eventos = array();
+        $eventos_forward = array();
+
+        $infoLlamada = array(
             'calltype'      =>  $sTipoLlamada,
             'campaign_id'   =>  $idCampaign,
             'call_id'       =>  $idLlamada,
@@ -973,7 +977,13 @@ SQL_EXISTE_AUDIT;
             'shortcall'     =>  $bShortFlag ? 1 : 0,
             'campaignlog_id'=>  NULL,
             'queue'         =>  $paramProgreso['queue'],
-        ), $this->_construirEventoProgresoLlamada($paramProgreso), array('AgentUnlinked', array($sAgente, $infoLlamada)), array('ECCPProcess', 'emitirEventos', array($eventos_forward))];
+        );
+
+        list($infoLlamada['campaignlog_id'], $eventos_forward) = $this->_construirEventoProgresoLlamada($paramProgreso);
+        $eventos_forward[] = array('AgentUnlinked', array($sAgente, $infoLlamada));
+
+        $eventos[] = array('ECCPProcess', 'emitirEventos', array($eventos_forward));
+        return $eventos;
     }
 
     private function _marcarFinalHold($iTimestampFinalPausa, $sAgente, $infoLlamada, $infoSeguimiento)

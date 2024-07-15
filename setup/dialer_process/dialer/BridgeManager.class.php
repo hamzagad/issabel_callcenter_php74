@@ -26,9 +26,11 @@ class BridgeManager
 	public $DEBUG = FALSE;
 
     public $_bridges = array();
+    private $_log;
 
-    function __construct(private $_log)
+    function __construct($_log)
     {
+        $this->_log = $log;
     }
 
     function msg_BridgeCreate($params)

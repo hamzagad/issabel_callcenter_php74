@@ -29,8 +29,6 @@ define('AMI_PORT', 5038);
 
 class AMIClientConn extends MultiplexConn
 {
-    public $multiplexSrv;
-    public $sKey;
     private $oLogger;
     private $server;
     private $port;

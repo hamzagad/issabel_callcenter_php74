@@ -23,6 +23,9 @@
 
 class ListaLlamadas implements IteratorAggregate
 {
+    private $_tuberia;
+    private $_log;
+
     private $_llamadas = array();
     private $_indices = array(
         'id_llamada_saliente'   =>  array(),
@@ -36,10 +39,12 @@ class ListaLlamadas implements IteratorAggregate
     );
     private $_idcurrentcall_retrasado = array();
 
-    function __construct($_tuberia, $_log)
+    function __construct($tuberia, $log)
     {
+    	$this->_tuberia = $tuberia;
+        $this->_log = $log;
     }
-
+    
     function numLlamadas() { return count($this->_llamadas); }
 
     function nuevaLlamada($tipo_llamada)

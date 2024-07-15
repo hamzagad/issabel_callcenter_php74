@@ -30,6 +30,7 @@
  */
 class TuberiaMensaje extends MultiplexConn
 {
+    private $_nombreFuente;
     public $sKey;
     public $multiplexSrv;             // La fuente de mensajes que llegan
     private $_socks = NULL;             // Par de sockets antes de fork()
@@ -42,8 +43,9 @@ class TuberiaMensaje extends MultiplexConn
     // Manejadores de eventos: _manejadoresEventos[$fuente][$nombreMsg] = array($obj, $metodo)
     private $_manejadoresEventos = array();
 
-    function __construct($_nombreFuente)
+    function __construct($sFuente)
     {
+        $this->_nombreFuente = $sFuente;
         $this->_socks = stream_socket_pair(
             STREAM_PF_UNIX,
             STREAM_SOCK_STREAM,

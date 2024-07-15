@@ -34,6 +34,12 @@ define('AST_DEVICE_ONHOLD',     8);
 
 class Agente
 {
+    // Relaciones con otros objetos conocidos
+    private $_log;
+    private $_tuberia;
+
+    private $_listaAgentes;
+
     /* Referencia a la llamada atendida por el agente, o NULL si no atiende.
      * Para entrar y salir de hold se requiere [incoming/outgoing, canal cliente,
      * id call, id current call ]*/
@@ -113,14 +119,17 @@ class Agente
     // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
     private $_logging_inicio = NULL;
 
-    function __construct(ListaAgentes $_listaAgentes, $idAgente, $iNumero, $sNombre,
-        $bEstatus, $sType, $_tuberia, // Relaciones con otros objetos conocidos
+    function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
+        $bEstatus, $sType, $tuberia, // Relaciones con otros objetos conocidos
         $_log)
     {
+        $this->_listaAgentes = $lista;
         $this->_id_agent = (int)$idAgente;
         $this->_name = (string)$sNombre;
         $this->_estatus = (bool)$bEstatus;
         $this->_type = (string)$sType;
+        $this->_tuberia = $tuberia;
+        $this->_log = $log;
         $this->resetTimeout();
 
         // Se setea vía interfaz pública para invocar __set()
@@ -372,9 +381,7 @@ class Agente
     public function asyncQueuePause($ami, $nstate, $queue = NULL, $reason = '')
     {
         $ami->asyncQueuePause(
-            function ($r, $sAgente, $nstate) {
-                return $this->_cb_QueuePause($r, $sAgente, $nstate);
-            },
+            array($this, '_cb_QueuePause'),
             array($this->channel, $nstate),
             $queue, $this->channel, $nstate, $reason);
     }
@@ -482,14 +489,14 @@ class Agente
             'login_channel'     =>  $this->login_channel,
             'oncall'            =>  !is_null($this->llamada),
             'clientchannel'     =>  is_null($this->llamada) ? NULL : $this->llamada->actualchannel,
-            'waitedcallinfo'    =>  ((is_null($this->llamada_agendada))
-                ? NULL
-                : array(
+            'waitedcallinfo'    =>  ((!is_null($this->llamada_agendada))
+            ? array(
                     'calltype'          =>  $this->llamada_agendada->tipo_llamada,
                     'campaign_id'       =>  $this->llamada_agendada->campania->id,
                     'callid'            =>  $this->llamada_agendada->id_llamada,
                     'status'            =>  $this->llamada_agendada->status,
-                )),
+            )
+            : NULL),
         );
     }
 
@@ -597,17 +604,13 @@ class Agente
     {
         if ($this->type == 'Agent') {
             $ami->asyncAgentlogoff(
-                function ($r, $log) {
-                    return $this->_cb_Agentlogoff($r, $log);
-                },
+                array($this, '_cb_Agentlogoff'),
                 array($log),
                 $this->number);
         } else {
             foreach ($this->colas_actuales as $q) {
                 $ami->asyncQueueRemove(
-                    function ($r, $log, $q) {
-                        return $this->_cb_QueueRemove($r, $log, $q);
-                    },
+                    array($this, '_cb_QueueRemove'),
                     array($log, $q),
                     $q, $this->channel);
             }

@@ -24,11 +24,13 @@
 class ECCPServer extends MultiplexServer
 {
     private $DEBUG = FALSE;
+    private $_tuberia = NULL;
 
     // Constructor con objeto adicional de tubería
-    function __construct($sUrlSocket, &$oLog, $_tuberia)
+    function __construct($sUrlSocket, &$oLog, $tuberia)
     {
     	parent::__construct($sUrlSocket, $oLog);
+        $this->_tuberia = $tuberia;
     }
 
     /* Para una nueva conexión, siempre se instancia un ECCPConn */

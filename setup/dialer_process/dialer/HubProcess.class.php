@@ -46,7 +46,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
     // Último instante en que se verificó que los procesos estaban activos
     private $_iTimestampVerificacionProcesos = NULL;
 
-    public function inicioPostDemonio($infoConfig = null, &$oMainLog = null)
+    public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
         $this->_log =& $oMainLog;
         $this->_config =& $infoConfig;
@@ -338,7 +338,7 @@ XML_CRASH_MSG;
         }
     }
 
-    public function limpiezaDemonio($signum = null)
+    public function limpiezaDemonio($signum)
     {
         // Propagar la señal si no es NULL
         if (!is_null($signum)) {

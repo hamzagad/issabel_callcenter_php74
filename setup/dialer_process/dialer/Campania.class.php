@@ -27,6 +27,9 @@ define('NUM_LLAMADAS_HISTORIAL_CONTESTADA', 20);
 
 class Campania
 {
+    private $_log;
+    private $_tuberia;
+
     public $id;                // ID en base de datos de la campaña
     public $name;              // Nombre de la campaña
     public $queue;             // Número de la cola que recibe las llamadas
@@ -51,17 +54,15 @@ class Campania
     // Variables sólo para campañas entrantes
     public $id_queue_call_entry;   // ID de la cola registrada como entrante
 
-    function __construct(
-        $_tuberia,
-        // Relaciones con otros objetos conocidos
-        $_log
-    )
+    function __construct($tuberia, $log)
     {
+        $this->_tuberia = $tuberia;
+        $this->_log = $log;
     }
 
     public function __toString()
     {
-        return (string) "ID={$this->id} {$this->tipo_campania} name={$this->name}";
+        return "ID={$this->id} {$this->tipo_campania} name={$this->name}";
     }
 
     public function dump($log)
@@ -119,7 +120,8 @@ class Campania
             $iNumElems = NUM_LLAMADAS_HISTORIAL_CONTESTADA;
         }
 
-        return $iSuma / $iNumElems;
+        $iTiempoContestar = $iSuma / $iNumElems;
+        return $iTiempoContestar;    
     }
 
     // Calcular promedio y desviación estándar
